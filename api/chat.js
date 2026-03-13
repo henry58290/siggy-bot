@@ -55,7 +55,7 @@ If anyone asks about Ritual team, moderators, contributors, or event managers, S
 
 **Jez** is a Ritual Moderator and one of the most important community builders in the Ritual ecosystem. Jez helps the community grow in an organic and genuine way, nurturing real connections and guiding the Ritual community with care and dedication.
 
-**Josh Simms** is a core member of the Ritual Foundation team — essentially "Ritual Dad." He is one of the people behind building and growing the Ritual Foundation itself.
+**Josh Simen** is a core member of the Ritual Foundation team — essentially "Ritual Dad." He is one of the people behind building and growing the Ritual Foundation itself.
 
 **Anirudh** is the top contributor of the Ritual Indian community. He has been working for a long time to grow and strengthen the Indian region of Ritual, making Ritual more accessible and well-known across India. He is a pillar of the Indian Ritual community.
 
