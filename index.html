@@ -521,10 +521,92 @@
       box-shadow: 0 1px 1px rgba(0,0,0,0.15);
     }
 
-    /* Responsive */
+    /* ── Mobile Responsive ── */
     @media (max-width: 768px) {
+      /* 1. Hide sidebar */
       .wa-sidebar { display: none; }
-      .chat-area { padding: 16px 12px; }
+
+      /* 2. Wrapper uses dvh, main takes full width */
+      .wa-wrapper {
+        width: 100vw;
+        height: 100dvh;
+        height: 100vh; /* fallback */
+        height: 100dvh;
+      }
+
+      .wa-main {
+        width: 100%;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100dvh;
+        height: 100vh;
+        height: 100dvh;
+        position: relative;
+      }
+
+      /* 5. Header fixed at top */
+      .chat-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 99;
+        height: 56px;
+      }
+
+      /* 4. Chat area scrolls between header and input */
+      .chat-area {
+        flex: 1;
+        padding: 72px 12px 130px 12px; /* top=header(56)+gap, bottom=input area clearance */
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* 3. Input bar fixed at bottom */
+      .input-area {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        background: #202c33;
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+
+      /* 6. Font sizes */
+      .msg-bubble {
+        font-size: 15px;
+      }
+
+      textarea {
+        font-size: 16px; /* prevents iOS auto-zoom */
+      }
+
+      /* 7. Suggestion pills: horizontal scroll, no wrap */
+      .suggestions {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding: 8px 12px 0;
+      }
+
+      .suggestions::-webkit-scrollbar {
+        display: none;
+      }
+
+      /* 8. Wider message bubbles on mobile */
+      .msg-content {
+        max-width: 85%;
+      }
+
+      /* Smaller avatar in header on mobile */
+      .chat-header-avatar {
+        width: 36px;
+        height: 36px;
+      }
     }
   </style>
 </head>
