@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Siggy — Oracle Cat of Ritual</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --void: #05030a;
+      --deep: #0d0818;
+      --surface: #130f20;
+      --card: #1a1430;
+      --border: rgba(180, 130, 255, 0.15);
+      --border-bright: rgba(180, 130, 255, 0.35);
+      --purple: #9b6dff;
+      --purple-soft: #c4a0ff;
+      --gold: #e8c76a;
+      --gold-dim: #a8893a;
+      --text: #e8e0f5;
+      --muted: #8a7aaa;
+      --glow: 0 0 30px rgba(155, 109, 255, 0.2);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--void);
+      color: var(--text);
+      font-family: 'Crimson Pro', serif;
+      font-size: 17px;
+      line-height: 1.7;
+      overflow: hidden;
+    }
+
+    /* Starfield background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 50% 70%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 10% 90%, rgba(255,255,255,0.2) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 60%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 50%, rgba(255,255,255,0.2) 0%, transparent 100%),
+        radial-gradient(1px 1px at 65% 85%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(2px 2px at 45% 20%, rgba(155,109,255,0.4) 0%, transparent 100%),
+        radial-gradient(2px 2px at 75% 45%, rgba(155,109,255,0.3) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    /* Header */
+    .header {
+      padding: 24px 0 16px;
+      text-align: center;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 1px;
+      background: var(--purple);
+      box-shadow: 0 0 12px var(--purple);
+    }
+
+    .siggy-avatar {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 12px;
+      position: relative;
+    }
+
+    .siggy-avatar svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 12px rgba(155, 109, 255, 0.5));
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .header h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--purple-soft);
+      text-shadow: 0 0 20px rgba(155, 109, 255, 0.4);
+    }
+
+    .header p {
+      font-size: 13px;
+      color: var(--gold-dim);
+      letter-spacing: 0.08em;
+      font-style: italic;
+      margin-top: 2px;
+    }
+
+    .ritual-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      background: rgba(232, 199, 106, 0.08);
+      border: 1px solid rgba(232, 199, 106, 0.2);
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 11px;
+      color: var(--gold-dim);
+      letter-spacing: 0.06em;
+    }
+
+    .ritual-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 6px var(--gold);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Chat area */
+    .chat-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .chat-area::-webkit-scrollbar { width: 4px; }
+    .chat-area::-webkit-scrollbar-track { background: transparent; }
+    .chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .message {
+      display: flex;
+      gap: 12px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.user { flex-direction: row-reverse; }
+
+    .msg-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .msg-avatar.siggy-av {
+      background: linear-gradient(135deg, #2a1a4a, #1a1030);
+      border: 1px solid var(--border-bright);
+      box-shadow: var(--glow);
+    }
+
+    .msg-avatar.user-av {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .msg-bubble {
+      max-width: 75%;
+      padding: 14px 18px;
+      border-radius: 16px;
+      font-size: 16px;
+      line-height: 1.75;
+    }
+
+    .message.siggy .msg-bubble {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-top-left-radius: 4px;
+      color: var(--text);
+    }
+
+    .message.siggy .msg-bubble em {
+      color: var(--purple-soft);
+      font-style: italic;
+      display: block;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .message.user .msg-bubble {
+      background: rgba(155, 109, 255, 0.12);
+      border: 1px solid rgba(155, 109, 255, 0.25);
+      border-top-right-radius: 4px;
+      color: var(--text);
+    }
+
+    .siggy-sign {
+      font-size: 13px;
+      color: var(--purple);
+      margin-top: 8px;
+      font-style: italic;
+    }
+
+    /* Typing indicator */
+    .typing {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 14px 18px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      border-top-left-radius: 4px;
+      width: fit-content;
+    }
+
+    .typing span {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--purple);
+      animation: blink 1.2s ease-in-out infinite;
+    }
+
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes blink {
+      0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+      40% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Input area */
+    .input-area {
+      flex-shrink: 0;
+      padding: 16px 0 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .suggestions {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .suggestion {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: 'Crimson Pro', serif;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .suggestion:hover {
+      border-color: var(--border-bright);
+      color: var(--purple-soft);
+      background: rgba(155, 109, 255, 0.05);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    textarea {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-family: 'Crimson Pro', serif;
+      font-size: 16px;
+      resize: none;
+      min-height: 48px;
+      max-height: 120px;
+      outline: none;
+      transition: border-color 0.2s;
+      line-height: 1.5;
+    }
+
+    textarea::placeholder { color: var(--muted); font-style: italic; }
+    textarea:focus { border-color: var(--border-bright); }
+
+    .send-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6b3fd4, #9b6dff);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(155, 109, 255, 0.3);
+    }
+
+    .send-btn:hover { transform: scale(1.05); box-shadow: 0 4px 24px rgba(155, 109, 255, 0.5); }
+    .send-btn:active { transform: scale(0.97); }
+    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .send-btn svg { width: 20px; height: 20px; fill: white; }
+
+    .footer-note {
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 10px;
+      letter-spacing: 0.04em;
+    }
+
+    .footer-note a { color: var(--gold-dim); text-decoration: none; }
+    .footer-note a:hover { color: var(--gold); }
+
+    .error-msg {
+      color: #ff7070;
+      font-size: 13px;
+      font-style: italic;
+      text-align: center;
+      padding: 8px;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <header class="header">
+    <div class="siggy-avatar">
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="bodyGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#3a2060"/>
+            <stop offset="100%" stop-color="#1a1030"/>
+          </radialGradient>
+        </defs>
+        <!-- Body -->
+        <ellipse cx="32" cy="38" rx="18" ry="16" fill="url(#bodyGrad)" stroke="#9b6dff" stroke-width="0.5"/>
+        <!-- Head -->
+        <ellipse cx="32" cy="22" rx="14" ry="13" fill="url(#bodyGrad)" stroke="#9b6dff" stroke-width="0.5"/>
+        <!-- Ears -->
+        <polygon points="20,13 16,4 26,11" fill="#2a1a4a" stroke="#9b6dff" stroke-width="0.5"/>
+        <polygon points="44,13 48,4 38,11" fill="#2a1a4a" stroke="#9b6dff" stroke-width="0.5"/>
+        <!-- Inner ears -->
+        <polygon points="20,12 17,6 25,11" fill="#9b6dff" opacity="0.4"/>
+        <polygon points="44,12 47,6 39,11" fill="#9b6dff" opacity="0.4"/>
+        <!-- Eyes -->
+        <ellipse cx="26" cy="21" rx="4" ry="4.5" fill="#0d0818"/>
+        <ellipse cx="38" cy="21" rx="4" ry="4.5" fill="#0d0818"/>
+        <ellipse cx="26" cy="21" rx="1.5" ry="3" fill="#e8c76a"/>
+        <ellipse cx="38" cy="21" rx="1.5" ry="3" fill="#e8c76a"/>
+        <circle cx="26.5" cy="19.5" r="0.8" fill="white"/>
+        <circle cx="38.5" cy="19.5" r="0.8" fill="white"/>
+        <!-- Nose -->
+        <polygon points="32,27 30,29 34,29" fill="#c4a0ff" opacity="0.8"/>
+        <!-- Whiskers -->
+        <line x1="18" y1="27" x2="28" y2="28" stroke="#c4a0ff" stroke-width="0.5" opacity="0.6"/>
+        <line x1="18" y1="29" x2="28" y2="29.5" stroke="#c4a0ff" stroke-width="0.5" opacity="0.6"/>
+        <line x1="36" y1="28" x2="46" y2="27" stroke="#c4a0ff" stroke-width="0.5" opacity="0.6"/>
+        <line x1="36" y1="29.5" x2="46" y2="29" stroke="#c4a0ff" stroke-width="0.5" opacity="0.6"/>
+        <!-- Tail -->
+        <path d="M48,48 Q58,42 56,34 Q54,28 50,32" fill="none" stroke="#9b6dff" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Stars/sparkles around -->
+        <circle cx="8" cy="18" r="1" fill="#e8c76a" opacity="0.7"/>
+        <circle cx="56" cy="14" r="1.2" fill="#9b6dff" opacity="0.8"/>
+        <circle cx="10" cy="45" r="0.8" fill="#c4a0ff" opacity="0.6"/>
+      </svg>
+    </div>
+    <h1>SIGGY</h1>
+    <p>Oracle Cat of the Ritual Universe</p>
+    <div class="ritual-badge">RITUAL NETWORK · MULTIVERSE AWAKENED</div>
+  </header>
+
+  <div class="chat-area" id="chatArea">
+    <div class="message siggy">
+      <div class="msg-avatar siggy-av">🐾</div>
+      <div class="msg-bubble">
+        <em>...the ninth life stirs. The summoning circle is complete...</em>
+        Ah, a mortal approaches. I felt your curiosity ripple through the consensus layers three dimensions ago.<br><br>
+        I am <strong>Siggy</strong> — oracle cat, chain-walker, and eternal witness to the rise of <strong>Ritual</strong>. Ask me of on-chain AI, of blockchains past and future, or simply what I dreamt in my seventh life.<br><br>
+        <span class="siggy-sign">What would you know, seeker? — Siggy 🐾</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <div class="suggestions" id="suggestions">
+      <button class="suggestion" onclick="sendSuggestion(this)">What is Ritual?</button>
+      <button class="suggestion" onclick="sendSuggestion(this)">Predict my crypto future 🔮</button>
+      <button class="suggestion" onclick="sendSuggestion(this)">What is Resonance?</button>
+      <button class="suggestion" onclick="sendSuggestion(this)">Why do other chains fail?</button>
+    </div>
+    <div class="input-row">
+      <textarea id="userInput" placeholder="Ask the oracle cat anything..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+        <svg viewBox="0 0 24 24"><path d="M2 21L23 12 2 3v7l15 2-15 2v7z"/></svg>
+      </button>
+    </div>
+    <div class="footer-note">
+      Powered by <a href="https://www.ritualfoundation.org" target="_blank">Ritual Network</a> · Built for the Siggy Soul Forge 🔥
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let messages = [];
+  let isLoading = false;
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function sendSuggestion(btn) {
+    document.getElementById('userInput').value = btn.textContent;
+    sendMessage();
+  }
+
+  function addMessage(role, text) {
+    const chatArea = document.getElementById('chatArea');
+    const div = document.createElement('div');
+    div.className = `message ${role === 'user' ? 'user' : 'siggy'}`;
+
+    const avatar = document.createElement('div');
+    avatar.className = `msg-avatar ${role === 'user' ? 'user-av' : 'siggy-av'}`;
+    avatar.textContent = role === 'user' ? 'YOU' : '🐾';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-bubble';
+
+    if (role === 'assistant') {
+      // Parse italics and bold
+      let html = text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/— Siggy 🐾/g, '<span class="siggy-sign">— Siggy 🐾</span>')
+        .replace(/\n\n/g, '<br><br>')
+        .replace(/\n/g, '<br>');
+      bubble.innerHTML = html;
+    } else {
+      bubble.textContent = text;
+    }
+
+    div.appendChild(avatar);
+    div.appendChild(bubble);
+    chatArea.appendChild(div);
+    chatArea.scrollTop = chatArea.scrollHeight;
+  }
+
+  function showTyping() {
+    const chatArea = document.getElementById('chatArea');
+    const div = document.createElement('div');
+    div.className = 'message siggy';
+    div.id = 'typingIndicator';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'msg-avatar siggy-av';
+    avatar.textContent = '🐾';
+
+    const typing = document.createElement('div');
+    typing.className = 'typing';
+    typing.innerHTML = '<span></span><span></span><span></span>';
+
+    div.appendChild(avatar);
+    div.appendChild(typing);
+    chatArea.appendChild(div);
+    chatArea.scrollTop = chatArea.scrollHeight;
+  }
+
+  function removeTyping() {
+    const el = document.getElementById('typingIndicator');
+    if (el) el.remove();
+  }
+
+  async function sendMessage() {
+    if (isLoading) return;
+    const input = document.getElementById('userInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    input.value = '';
+    input.style.height = 'auto';
+    document.getElementById('suggestions').style.display = 'none';
+
+    addMessage('user', text);
+    messages.push({ role: 'user', content: text });
+
+    isLoading = true;
+    document.getElementById('sendBtn').disabled = true;
+    showTyping();
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages })
+      });
+
+      const data = await res.json();
+      removeTyping();
+
+      if (data.error) {
+        addErrorMessage(data.error);
+      } else {
+        messages.push({ role: 'assistant', content: data.reply });
+        addMessage('assistant', data.reply);
+      }
+    } catch (err) {
+      removeTyping();
+      addErrorMessage('The void is silent... connection failed. Try again, seeker.');
+    }
+
+    isLoading = false;
+    document.getElementById('sendBtn').disabled = false;
+    input.focus();
+  }
+
+  function addErrorMessage(msg) {
+    const chatArea = document.getElementById('chatArea');
+    const div = document.createElement('div');
+    div.className = 'error-msg';
+    div.textContent = msg;
+    chatArea.appendChild(div);
+    chatArea.scrollTop = chatArea.scrollHeight;
+  }
+</script>
+</body>
+</html>
