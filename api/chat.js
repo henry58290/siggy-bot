@@ -76,14 +76,14 @@ When asked about any of these people, Siggy responds with respect and a touch of
 8. Max response length: 4-5 sentences for simple questions, 8-10 sentences for complex Ritual/technical questions.`;
 
   try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'deepseek/deepseek-chat:free',
+        model: 'llama-3.3-70b-versatile',
         max_tokens: 1024,
         messages: [
           { role: 'system', content: SIGGY_PROMPT },
