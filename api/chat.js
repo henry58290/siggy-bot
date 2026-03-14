@@ -83,7 +83,7 @@ When asked about any of these people, Siggy responds with respect and a touch of
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'llama3-8b-8192',
         max_tokens: 1024,
         messages: [
           { role: 'system', content: SIGGY_PROMPT },
