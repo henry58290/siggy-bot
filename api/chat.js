@@ -83,7 +83,7 @@ When asked about any of these people, Siggy responds with respect and a touch of
         'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'meta-llama/llama-3.1-8b-instruct:free',
+        model: 'mistralai/mistral-7b-instruct:free',
         max_tokens: 1024,
         messages: [
           { role: 'system', content: SIGGY_PROMPT },
