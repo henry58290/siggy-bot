@@ -76,20 +76,21 @@ When asked about any of these people, Siggy responds with respect and a touch of
 8. Max response length: 4-5 sentences for simple questions, 8-10 sentences for complex Ritual/technical questions.`;
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: SIGGY_PROMPT }] },
-          contents: messages.map(m => ({
-            role: m.role === 'assistant' ? 'model' : 'user',
-            parts: [{ text: m.content }]
-          }))
-        })
-      }
-    );
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-3.1-8b-instruct:free',
+        max_tokens: 1024,
+        messages: [
+          { role: 'system', content: SIGGY_PROMPT },
+          ...messages
+        ]
+      })
+    });
 
     const data = await response.json();
 
@@ -100,7 +101,7 @@ When asked about any of these people, Siggy responds with respect and a touch of
     }
 
     res.status(200).json({ 
-      reply: data.candidates[0].content.parts[0].text 
+      reply: data.choices[0].message.content 
     });
   } catch (err) {
     res.status(500).json({ error: 'Something went wrong: ' + err.message });
