@@ -76,29 +76,32 @@ When asked about any of these people, Siggy responds with respect and a touch of
 8. Max response length: 4-5 sentences for simple questions, 8-10 sentences for complex Ritual/technical questions.`;
 
   try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        max_tokens: 1024,
-        messages: [
-          { role: 'system', content: SIGGY_PROMPT },
-          ...messages
-        ]
-      })
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: SIGGY_PROMPT }] },
+          contents: messages.map(m => ({
+            role: m.role === 'assistant' ? 'model' : 'user',
+            parts: [{ text: m.content }]
+          }))
+        })
+      }
+    );
 
     const data = await response.json();
 
     if (!response.ok) {
-      return res.status(response.status).json({ error: data.error?.message || 'API error' });
+      return res.status(response.status).json({ 
+        error: data.error?.message || 'API error' 
+      });
     }
 
-    res.status(200).json({ reply: data.choices[0].message.content });
+    res.status(200).json({ 
+      reply: data.candidates[0].content.parts[0].text 
+    });
   } catch (err) {
     res.status(500).json({ error: 'Something went wrong: ' + err.message });
   }
